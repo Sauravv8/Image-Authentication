@@ -1,8 +1,10 @@
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
+import SearchHistoryPage from './components/SearchHistoryPage';
 
-function App() {
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -16,7 +18,27 @@ function App() {
     );
   }
 
-  return user ? <Dashboard /> : <Login />;
+  return user ? <>{children}</> : <Navigate to="/login" />;
+}
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/history" element={
+          <ProtectedRoute>
+            <SearchHistoryPage />
+          </ProtectedRoute>
+        } />
+      </Routes>
+    </Router>
+  );
 }
 
 export default App;

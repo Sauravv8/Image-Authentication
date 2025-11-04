@@ -21,6 +21,8 @@ export default function TopSearchesBanner({ onSearchClick }: TopSearchesBannerPr
       setTopSearches(searches);
     } catch (error) {
       console.error('Error loading top searches:', error);
+      // Silently fail for top searches as it's not critical
+      setTopSearches([]);
     } finally {
       setLoading(false);
     }

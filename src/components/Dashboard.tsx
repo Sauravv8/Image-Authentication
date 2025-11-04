@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, History } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import SearchBar from './SearchBar';
 import ImageGrid from './ImageGrid';
@@ -22,10 +23,14 @@ export default function Dashboard() {
       setError(null);
       setCurrentSearchTerm(term);
 
+      // Save search term immediately
+      saveSearch(term).catch(console.error); // Don't await, let it happen in background
+
+      // Fetch images
       const images = await searchUnsplashImages(term);
       setSearchResults(images);
-
-      await saveSearch(term);
+      
+      // Trigger history refresh after successful search
       setHistoryRefreshTrigger((prev) => prev + 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to search images');
@@ -50,37 +55,29 @@ export default function Dashboard() {
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float-delayed"></div>
       </div>
 
-      <header className="relative bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100 sticky top-0 z-50">
+            <header className="relative bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-xl">IF</span>
+            <div className="flex items-center space-x-4">
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-full p-2">
+                <User className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">ImageFinder</h1>
+              <span className="font-medium text-gray-700">{user?.email}</span>
             </div>
-
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                  <User className="w-5 h-5 text-white" />
-                </div>
-                <div className="hidden sm:block">
-                  <p className="text-sm font-medium text-gray-900">
-                    {user?.user_metadata?.full_name || user?.email || 'User'}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {user?.email}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={handleSignOut}
-                className="p-2.5 bg-gray-100 hover:bg-red-50 rounded-xl text-gray-600 hover:text-red-600 transition-all duration-300 group"
-                title="Sign out"
+            <div className="flex items-center space-x-4">
+              <Link
+                to="/history"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <History className="w-4 h-4 mr-2" />
+                View History
+              </Link>
+              <button
+                onClick={() => signOut()}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
               </button>
             </div>
           </div>
