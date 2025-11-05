@@ -15,7 +15,11 @@ export interface UnsplashImage {
   };
 }
 
-const UNSPLASH_ACCESS_KEY = 'Xp74f69aQAm7rLcMA3WYKvyfAbQ5xyZUnN6RC_yFObM';
+const UNSPLASH_ACCESS_KEY = import.meta.env.VITE_UNSPLASH_ACCESS_KEY;
+
+if (!UNSPLASH_ACCESS_KEY) {
+  throw new Error('Missing VITE_UNSPLASH_ACCESS_KEY in environment variables');
+}
 
 export async function searchUnsplashImages(query: string, page = 1): Promise<UnsplashImage[]> {
   const response = await fetch(
@@ -28,7 +32,13 @@ export async function searchUnsplashImages(query: string, page = 1): Promise<Uns
   );
 
   if (!response.ok) {
-    throw new Error('Failed to fetch images from Unsplash');
+    const errorData = await response.json().catch(() => null);
+    console.error('Unsplash API error:', {
+      status: response.status,
+      statusText: response.statusText,
+      errorData
+    });
+    throw new Error(`Failed to fetch images from Unsplash: ${response.statusText}`);
   }
 
   const data = await response.json();
