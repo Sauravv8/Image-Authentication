@@ -1,12 +1,20 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
+import { User, Session } from "@supabase/supabase-js";
+import { supabase } from "../lib/supabase";
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signInWithProvider: (provider: 'google' | 'facebook' | 'github') => Promise<void>;
+  signInWithProvider: (
+    provider: "google" | "facebook" | "github"
+  ) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -24,7 +32,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       (async () => {
         setSession(session);
         setUser(session?.user ?? null);
@@ -35,13 +45,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signInWithProvider = async (provider: 'google' | 'facebook' | 'github') => {
+  const signInWithProvider = async (
+    provider: "google" | "facebook" | "github"
+  ) => {
+    console.log(`Signing in with ${provider}`);
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: window.location.origin,
+        redirectTo: "https://image-authentication.vercel.app/#",
       },
     });
+
     if (error) throw error;
   };
 
@@ -51,7 +65,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signInWithProvider, signOut }}>
+    <AuthContext.Provider
+      value={{ user, session, loading, signInWithProvider, signOut }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -60,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }
