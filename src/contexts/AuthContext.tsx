@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: "https://image-authentication.vercel.app/#",
+        redirectTo: window.location.origin,
       },
     });
 
